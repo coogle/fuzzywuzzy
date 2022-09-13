@@ -8,6 +8,7 @@ use ArrayAccess;
 use ArrayIterator;
 use Closure;
 use Countable;
+use InvalidArgumentException;
 use IteratorAggregate;
 use Traversable;
 
@@ -15,16 +16,22 @@ use Traversable;
  * Collection provides an array-like interface for working with a set of elements.
  *
  * @author Michael Crumm <mike@crumm.net>
+ *
+ * @psalm-template T
  */
 class Collection implements ArrayAccess, IteratorAggregate, Countable
 {
-    /** @var mixed[] $elements */
+    /**
+     * @var T[] $elements
+     * @psalm-var T[] $elements
+     */
     private array $elements;
 
     /**
      * Collection Constructor.
      *
      * @param mixed[] $elements
+     * @psalm-param T[] $elements
      */
     public function __construct(array $elements = [])
     {
@@ -35,6 +42,7 @@ class Collection implements ArrayAccess, IteratorAggregate, Countable
      * Adds an element to this collection.
      *
      * @param mixed $element Elements can be of any type.
+     * @psalm-param T $element Elements can be of any type.
      */
     public function add(mixed $element): void
     {
@@ -45,6 +53,7 @@ class Collection implements ArrayAccess, IteratorAggregate, Countable
      * Returns true if the given elements exists in this collection.
      *
      * @param mixed $element
+     * @psalm-param T $element
      * @return boolean
      */
     public function contains(mixed $element): bool
@@ -64,26 +73,30 @@ class Collection implements ArrayAccess, IteratorAggregate, Countable
      * Returns the set difference of this Collection and another comparable.
      *
      * @param array|Traversable $cmp Value to compare against.
-     * @return static
-     * @throws \InvalidArgumentException When $cmp is not a valid for
+     * @psalm-param T[]|Traversable $cmp Value to compare against.
+     * @return self
+     * @psalm-return self<T>
+     * @throws InvalidArgumentException When $cmp is not a valid for
      * difference.
      */
-    public function difference(array|Traversable $cmp): static
+    public function difference(array|Traversable $cmp): self
     {
-        return new static(array_diff($this->elements, static::coerce($cmp)->toArray()));
+        return new self(array_diff($this->elements, self::coerce($cmp)->toArray()));
     }
 
     /**
-     * @param callable $p
-     * @return static
+     * @param Closure $p
+     * @return self
+     * @psalm-return self<T>
      */
-    public function filter(Closure $p): static
+    public function filter(Closure $p): self
     {
-        return new static(array_filter($this->elements, $p));
+        return new self(array_filter($this->elements, $p));
     }
 
     /**
      * @return ArrayIterator
+     * @psalm-return ArrayIterator<array-key, T>
      */
     public function getIterator(): ArrayIterator
     {
@@ -94,13 +107,15 @@ class Collection implements ArrayAccess, IteratorAggregate, Countable
      * Returns the set intersection of this Collection and another comparable.
      *
      * @param array|Traversable $cmp Value to compare against.
-     * @return static
-     * @throws \InvalidArgumentException When $cmp is not a valid for
+     * @psalm-param T[]|Traversable $cmp Value to compare against.
+     * @return self
+     * @psalm-return self<T>
+     * @throws InvalidArgumentException When $cmp is not a valid for
      * intersection.
      */
-    public function intersection(array|Traversable $cmp): static
+    public function intersection(array|Traversable $cmp): self
     {
-        return new static(array_intersect($this->elements, static::coerce($cmp)->toArray()));
+        return new self(array_intersect($this->elements, self::coerce($cmp)->toArray()));
     }
 
     /**
@@ -123,7 +138,8 @@ class Collection implements ArrayAccess, IteratorAggregate, Countable
      */
     public function join(string $glue = ' '): string
     {
-        return implode((string) $glue, $this->elements);
+        /** @psalm-suppress MixedArgumentTypeCoercion */
+        return implode($glue, $this->elements);
     }
 
     /**
@@ -131,22 +147,25 @@ class Collection implements ArrayAccess, IteratorAggregate, Countable
      * the predicate function onto each element in this collection.
      *
      * @param Closure $p Predicate function.
-     * @return static
+     * @return self
+     * @psalm-template MappedT
+     * @psalm-param Closure(T): MappedT $p
+     * @psalm-return self<MappedT>
      */
-    public function map(Closure $p): static
+    public function map(Closure $p): self
     {
-        return new static(array_map($p, $this->elements));
+        return new self(array_map($p, $this->elements));
     }
 
     /**
      * Apply a multisort to this collection of elements.
      *
      * @param mixed $arg [optional]
-     * @param mixed $arg [optional]
      * @param mixed $_ [optional]
-     * @return static
+     * @return self
+     * @psalm-return self<T>
      */
-    public function multiSort(mixed ...$args): static
+    public function multiSort(mixed ...$args): self
     {
         if (func_num_args() < 1) {
             throw new \LogicException('multiSort requires at least one argument.');
@@ -157,11 +176,11 @@ class Collection implements ArrayAccess, IteratorAggregate, Countable
 
         call_user_func_array('array_multisort', $args);
 
-        return new static($elements);
+        return new self($elements);
     }
 
     /**
-     * @param mixed $offset
+     * @param int $offset
      * @return bool
      */
     public function offsetExists(mixed $offset): bool
@@ -170,8 +189,9 @@ class Collection implements ArrayAccess, IteratorAggregate, Countable
     }
 
     /**
-     * @param mixed $offset
-     * @return mixed
+     * @param int $offset
+     * @return mixed|null
+     * @psalm-return T|null
      */
     public function offsetGet(mixed $offset): mixed
     {
@@ -179,8 +199,9 @@ class Collection implements ArrayAccess, IteratorAggregate, Countable
     }
 
     /**
-     * @param mixed $offset
+     * @param int|null $offset
      * @param mixed $value
+     * @psalm-param T $value
      */
     public function offsetSet(mixed $offset, mixed $value): void
     {
@@ -193,7 +214,7 @@ class Collection implements ArrayAccess, IteratorAggregate, Countable
     }
 
     /**
-     * @param mixed $offset
+     * @param int $offset
      */
     public function offsetUnset(mixed $offset): void
     {
@@ -203,41 +224,45 @@ class Collection implements ArrayAccess, IteratorAggregate, Countable
     /**
      * Returns a new collection with the elements of this collection, reversed.
      *
-     * @return static
+     * @return self
+     * @psalm-return self<T>
      */
-    public function reverse(): static
+    public function reverse(): self
     {
-        return new static(array_reverse($this->elements));
+        return new self(array_reverse($this->elements));
     }
 
     /**
-     * @param mixed $offset
+     * @param int $offset
      * @param int|null $length
-     * @return static
+     * @return self
+     * @psalm-return self<T>
      */
-    public function slice(mixed $offset, ?int $length = null)
+    public function slice(int $offset, ?int $length = null)
     {
-        return new static(array_slice($this->elements, $offset, $length, true));
+        return new self(array_slice($this->elements, $offset, $length, true));
     }
 
     /**
      * Returns a new collection with the elements of this collection, sorted.
      *
-     * @return static
+     * @return self
+     * @psalm-return self<T>
      */
-    public function sort(): static
+    public function sort(): self
     {
         $sorted = $this->elements;
 
         sort($sorted);
 
-        return new static($sorted);
+        return new self($sorted);
     }
 
     /**
      * Returns the elements in this collection as an array.
      *
      * @return array
+     * @psalm-return T[]
      */
     public function toArray(): array
     {
@@ -247,23 +272,19 @@ class Collection implements ArrayAccess, IteratorAggregate, Countable
     /**
      * Coerce an array-like value into a Collection.
      *
-     * @param array|Traversable $elements    Value to compare against.
-     * @return Collection
-     * @throws \InvalidArgumentException When $cmp is not an array or Traversable.
+     * @psalm-template TNew
+     * @param TNew[]|Traversable $elements    Value to compare against.
+     * @return self
+     * @psalm-return self<TNew>
      */
-    public static function coerce(array|Traversable $elements)
+    public static function coerce(array|Traversable $elements): self
     {
         if ($elements instanceof Collection) {
             return $elements;
-        } elseif ($elements instanceof \Traversable) {
+        } elseif ($elements instanceof Traversable) {
             $elements = iterator_to_array($elements);
-        } elseif (!is_array($elements)) {
-            throw new \InvalidArgumentException(sprintf(
-                'coerce requires an array or \Traversable, %s given.',
-                is_object($elements) ? get_class($elements) : gettype($elements)
-            ));
         }
 
-        return new static($elements);
+        return new self($elements);
     }
 }

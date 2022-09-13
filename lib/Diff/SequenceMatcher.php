@@ -24,6 +24,10 @@ class SequenceMatcher extends Diff_SequenceMatcher
      */
     public function __construct(array|string $a, array|string $b, ?Closure $junkCallback = null, array $options = [])
     {
+        /**
+         * Strings are expected for the callables
+         * @psalm-suppress InvalidArgument
+         */
         parent::__construct($a, $b, $junkCallback, $options);
     }
 }

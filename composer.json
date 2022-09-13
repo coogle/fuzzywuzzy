@@ -14,14 +14,21 @@
         "phpspec/php-diff": "^1.1"
     },
     "require-dev": {
-        "phpspec/phpspec": "^7.2"
+        "phpspec/phpspec": "^7.2",
+        "vimeo/psalm": "^4.27"
     },
     "autoload": {
         "psr-4": {
           "FuzzyWuzzy\\": "lib/"
         }
     },
+    "scripts": {
+        "lint": "psalm --show-info=true"
+    },
     "config": {
-        "bin-dir": "bin"
+        "bin-dir": "bin",
+        "allow-plugins": {
+            "composer/package-versions-deprecated": true
+        }
     }
 }

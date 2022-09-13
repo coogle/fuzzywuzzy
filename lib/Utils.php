@@ -59,10 +59,6 @@ class Utils
      */
     public static function validateString(string $str): bool
     {
-        if (!is_string($str)) {
-            return false;
-        }
-
         return strlen($str) > 0;
     }
 }

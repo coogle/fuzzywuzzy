@@ -58,6 +58,7 @@ class Fuzz
 
         $m = new Diff\SequenceMatcher($shorter, $longer);
 
+        /** @var array<array{int, int, int}> $blocks */
         $blocks = $m->getMatchingBlocks();
         $scores = [];
 
@@ -74,6 +75,10 @@ class Fuzz
             } else {
                 $scores[] = $r;
             }
+        }
+
+        if (count($scores) === 0) {
+            return 0;
         }
 
         return Utils::intr(100 * max($scores));
@@ -224,7 +229,7 @@ class Fuzz
         $combined_1to2 = trim($combined_1to2);
         $combined_2to1 = trim($combined_2to1);
 
-        $ratioFunc = (bool) $partial ? 'partialRatio' : 'ratio';
+        $ratioFunc = $partial ? 'partialRatio' : 'ratio';
 
         $pairwise = [
             call_user_func([$this, $ratioFunc], $sorted_sect, $combined_1to2),
@@ -247,7 +252,7 @@ class Fuzz
         $sorted1 = $this->processAndSort($s1, $forceAscii);
         $sorted2 = $this->processAndSort($s2, $forceAscii);
 
-        if ((bool) $partial) {
+        if ($partial) {
             return $this->partialRatio($sorted1, $sorted2);
         }
 
