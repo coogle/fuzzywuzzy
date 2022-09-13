@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace FuzzyWuzzy;
 
 /**
@@ -15,7 +17,7 @@ class Utils
      * @param float $num Numeric value to round.
      * @return int
      */
-    public static function intr($num)
+    public static function intr(float|int $num): int
     {
         return (int) round($num, 10, PHP_ROUND_HALF_DOWN);
     }
@@ -31,9 +33,11 @@ class Utils
      * @param boolean $forceAscii If true, string will be converted to ASCII before processing.
      * @return string
      */
-    public static function fullProcess($str, $forceAscii = true)
+    public static function fullProcess(string $str, bool $forceAscii = true): string
     {
-        if (empty ($str)) { return ''; }
+        if (empty($str)) {
+            return '';
+        }
 
         # TODO: Force ascii, if true
 
@@ -53,9 +57,11 @@ class Utils
      * @param string $str String to validate.
      * @return boolean
      */
-    public static function validateString($str)
+    public static function validateString(string $str): bool
     {
-        if (!is_string($str)) { return false; }
+        if (!is_string($str)) {
+            return false;
+        }
 
         return strlen($str) > 0;
     }

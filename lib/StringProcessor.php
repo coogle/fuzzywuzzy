@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace FuzzyWuzzy;
 
 /**
@@ -10,58 +12,58 @@ namespace FuzzyWuzzy;
 class StringProcessor
 {
     /**
-     * @param $str
-     * @return mixed
+     * @param string $str
+     * @return string
      */
-    public static function nonAlnumToWhitespace($str)
+    public static function nonAlnumToWhitespace(string $str): string
     {
         return preg_replace('/(?i)\W/u', ' ', $str);
     }
 
     /**
-     * @param $str
+     * @param string $str
      * @return string
      */
-    public static function upcase($str)
+    public static function upcase(string $str): string
     {
         return strtoupper($str);
     }
 
     /**
-     * @param $str
+     * @param string $str
      * @return string
      */
-    public static function downcase($str)
+    public static function downcase(string $str): string
     {
         return strtolower($str);
     }
 
     /**
-     * @param $pieces
+     * @param string[] $pieces
      * @param string $glue
      * @return string
      */
-    public static function join($pieces, $glue = ' ')
+    public static function join(array $pieces, string $glue = ' '): string
     {
         return Collection::coerce($pieces)->join($glue);
     }
 
     /**
-     * @param $str
+     * @param string $str
      * @param string $delimiter
      * @return Collection
      */
-    public static function split($str, $delimiter = ' ')
+    public static function split(string $str, string $delimiter = ' '): Collection
     {
         return new Collection(explode($delimiter, $str));
     }
 
     /**
-     * @param $str
+     * @param string $str
      * @param string $chars
      * @return string
      */
-    public static function strip($str, $chars = " \t\n\r\0\x0B")
+    public static function strip(string $str, string $chars = " \t\n\r\0\x0B"): string
     {
         return trim($str, $chars);
     }
