@@ -23,7 +23,8 @@
         }
     },
     "scripts": {
-        "lint": "psalm --show-info=true"
+        "lint": "psalm --show-info=true",
+        "test": "phpspec run"
     },
     "config": {
         "bin-dir": "bin",
