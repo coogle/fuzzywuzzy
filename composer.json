@@ -7,7 +7,7 @@
       {
         "name": "Michael Crumm",
         "email": "mike@crumm.net"
-      },
+      }
     ],
     "require": {
         "php": "^8.1",
